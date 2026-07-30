@@ -31,6 +31,17 @@ export const auth = betterAuth({
     ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
       : []),
+    // v0 serves the running app from a sandbox/preview host that is not
+    // exposed as an env var, so allow those wildcard origins outside
+    // production. Never widened in production.
+    ...(process.env.NODE_ENV === "production"
+      ? []
+      : [
+          "http://localhost:3000",
+          "https://*.vercel.run",
+          "https://*.vusercontent.net",
+          "https://*.vercel.app",
+        ]),
   ],
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days

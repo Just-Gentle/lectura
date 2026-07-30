@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { BookOpen, LogOut } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
+import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,6 +16,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+
+const navLinks = [
+  { href: "/dashboard", label: "Lectures" },
+  { href: "/progress", label: "Progress" },
+]
 
 function initials(name: string) {
   return (
@@ -29,6 +35,7 @@ function initials(name: string) {
 
 export function AppHeader({ name, email }: { name: string; email: string }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [signingOut, setSigningOut] = useState(false)
 
   async function handleSignOut() {
@@ -41,10 +48,33 @@ export function AppHeader({ name, email }: { name: string; email: string }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/40 bg-background/80 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-accent" aria-hidden="true" />
-          <span className="text-lg font-semibold">Lecture Assistant</span>
-        </Link>
+        <div className="flex min-w-0 items-center gap-3 sm:gap-6">
+          <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
+            <BookOpen className="h-6 w-6 text-accent" aria-hidden="true" />
+            <span className="hidden text-lg font-semibold sm:inline">
+              Lecture Assistant
+            </span>
+            <span className="sr-only sm:hidden">Lecture Assistant</span>
+          </Link>
+
+          <nav aria-label="Main" className="flex items-center gap-1">
+            {navLinks.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-current={pathname === href ? "page" : undefined}
+                className={cn(
+                  "rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors",
+                  pathname === href
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger

@@ -1,3 +1,5 @@
+import { Signer } from "@aws-sdk/rds-signer"
+import { awsCredentialsProvider } from "@vercel/functions/oidc"
 import { Client } from "pg"
 
 const statements = [
@@ -86,9 +88,33 @@ const statements = [
     "createdAt" timestamp NOT NULL DEFAULT now()
   )`,
   `CREATE INDEX IF NOT EXISTS "quiz_attempts_lecture_idx" ON "quiz_attempts" ("lectureId", "userId")`,
+  // Progress page reads every attempt for a user in chronological order.
+  `CREATE INDEX IF NOT EXISTS "quiz_attempts_user_created_idx" ON "quiz_attempts" ("userId", "createdAt")`,
+  `CREATE INDEX IF NOT EXISTS "study_sets_userId_idx" ON "study_sets" ("userId")`,
 ]
 
-const client = new Client({ connectionString: process.env.DATABASE_URL })
+const port = Number(process.env.PGPORT ?? 5432)
+const username = process.env.PGUSER ?? "postgres"
+
+const signer = new Signer({
+  credentials: awsCredentialsProvider({
+    roleArn: process.env.AWS_ROLE_ARN,
+    clientConfig: { region: process.env.AWS_REGION },
+  }),
+  region: process.env.AWS_REGION,
+  hostname: process.env.PGHOST,
+  username,
+  port,
+})
+
+const client = new Client({
+  host: process.env.PGHOST,
+  port,
+  database: process.env.PGDATABASE ?? "postgres",
+  user: username,
+  password: await signer.getAuthToken(),
+  ssl: { rejectUnauthorized: false },
+})
 await client.connect()
 
 for (const sql of statements) {

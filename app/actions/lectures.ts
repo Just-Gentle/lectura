@@ -207,6 +207,7 @@ export async function saveQuizAttempt({
 
   await db.insert(quizAttempts).values({ lectureId, userId, score, total, answers })
   revalidatePath(`/lectures/${lectureId}`)
+  revalidatePath("/progress")
 }
 
 export async function deleteLecture(lectureId: number) {
@@ -236,4 +237,5 @@ export async function deleteLecture(lectureId: number) {
   }
 
   revalidatePath("/dashboard")
+  revalidatePath("/progress")
 }

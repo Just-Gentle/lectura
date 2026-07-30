@@ -2,7 +2,18 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
-@custom-variant dark (&:is(.dark *));
+/* Support both an explicit `.dark` class and the OS preference. The class form
+   also matches the element itself, not just its descendants. */
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:not(.light, .light *)) {
+      @slot;
+    }
+  }
+}
 
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -84,9 +95,11 @@
   --sidebar-ring: oklch(0.56 0.2 264);
 }
 
-/* Elegant dark theme */
-.dark {
-  color-scheme: dark;
+/* Elegant dark theme.
+   `--dark-*` holds the palette so it can be applied by the `.dark` class and
+   by the OS preference without duplicating every token. */
+:root {
+  --dark-color-scheme: dark;
   --background: oklch(0.08 0.005 280);
   --foreground: oklch(0.94 0.005 280);
   --card: oklch(0.14 0.008 280);
