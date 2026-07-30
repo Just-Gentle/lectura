@@ -75,7 +75,9 @@ export const lectures = pgTable("lectures", {
   title: text("title").notNull(),
   courseName: text("courseName"),
   fileName: text("fileName").notNull(),
-  fileUrl: text("fileUrl").notNull(),
+  // Blob store is private, so we keep the pathname and stream the file through
+  // an authenticated route. A private blob URL is not directly fetchable.
+  filePath: text("filePath").notNull(),
   fileSize: integer("fileSize").default(0).notNull(),
   pageCount: integer("pageCount").default(0).notNull(),
   wordCount: integer("wordCount").default(0).notNull(),
