@@ -1,11 +1,11 @@
 "use server"
 
 import { del, put } from "@vercel/blob"
-import { and, desc, eq } from "drizzle-orm"
+import { and, asc, desc, eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { generateStudySet, STUDY_MODEL } from "@/lib/ai/generate-study-set"
 import { db } from "@/lib/db"
-import { lectures, quizAttempts, studySets } from "@/lib/db/schema"
+import { lectureMessages, lectures, quizAttempts, studySets } from "@/lib/db/schema"
 import { extractPdfText } from "@/lib/pdf"
 import { getUserId } from "@/lib/session"
 
@@ -51,6 +51,27 @@ export async function listQuizAttempts(lectureId: number) {
     .from(quizAttempts)
     .where(and(eq(quizAttempts.lectureId, lectureId), eq(quizAttempts.userId, userId)))
     .orderBy(desc(quizAttempts.createdAt))
+}
+
+export async function listLectureMessages(lectureId: number) {
+  const userId = await getUserId()
+  return db
+    .select()
+    .from(lectureMessages)
+    .where(
+      and(eq(lectureMessages.lectureId, lectureId), eq(lectureMessages.userId, userId)),
+    )
+    .orderBy(asc(lectureMessages.createdAt))
+}
+
+export async function clearLectureMessages(lectureId: number) {
+  const userId = await getUserId()
+  await db
+    .delete(lectureMessages)
+    .where(
+      and(eq(lectureMessages.lectureId, lectureId), eq(lectureMessages.userId, userId)),
+    )
+  revalidatePath(`/lectures/${lectureId}`)
 }
 
 export async function uploadLecture(formData: FormData): Promise<ActionResult> {
@@ -226,6 +247,11 @@ export async function deleteLecture(lectureId: number) {
   await db
     .delete(quizAttempts)
     .where(and(eq(quizAttempts.lectureId, lectureId), eq(quizAttempts.userId, userId)))
+  await db
+    .delete(lectureMessages)
+    .where(
+      and(eq(lectureMessages.lectureId, lectureId), eq(lectureMessages.userId, userId)),
+    )
   await db
     .delete(lectures)
     .where(and(eq(lectures.id, lectureId), eq(lectures.userId, userId)))

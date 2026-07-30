@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { BookOpen, CheckCircle2, FileText, Layers } from "lucide-react"
 import { listLectures } from "@/app/actions/lectures"
 import { AppHeader } from "@/components/app-header"
-import { LectureCard } from "@/components/lecture-card"
+import { LectureBrowser } from "@/components/lecture-browser"
 import { UploadLectureDialog } from "@/components/upload-lecture-dialog"
 import { Card } from "@/components/ui/card"
 import { getCurrentUser } from "@/lib/session"
@@ -77,13 +77,7 @@ export default async function DashboardPage() {
             <UploadLectureDialog variant="empty" />
           </Card>
         ) : (
-          <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {lectures.map((lecture) => (
-              <li key={lecture.id}>
-                <LectureCard lecture={lecture} />
-              </li>
-            ))}
-          </ul>
+          <LectureBrowser lectures={lectures} />
         )}
       </main>
     </div>

@@ -91,6 +91,16 @@ const statements = [
   // Progress page reads every attempt for a user in chronological order.
   `CREATE INDEX IF NOT EXISTS "quiz_attempts_user_created_idx" ON "quiz_attempts" ("userId", "createdAt")`,
   `CREATE INDEX IF NOT EXISTS "study_sets_userId_idx" ON "study_sets" ("userId")`,
+  `CREATE TABLE IF NOT EXISTS "lecture_messages" (
+    "id" serial PRIMARY KEY,
+    "lectureId" integer NOT NULL,
+    "userId" text NOT NULL,
+    "role" text NOT NULL,
+    "content" text NOT NULL,
+    "createdAt" timestamp NOT NULL DEFAULT now()
+  )`,
+  // The chat panel loads one lecture's thread in chronological order.
+  `CREATE INDEX IF NOT EXISTS "lecture_messages_thread_idx" ON "lecture_messages" ("lectureId", "userId", "createdAt")`,
 ]
 
 const port = Number(process.env.PGPORT ?? 5432)

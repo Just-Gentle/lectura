@@ -138,7 +138,17 @@ export const quizAttempts = pgTable("quiz_attempts", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 })
 
+export const lectureMessages = pgTable("lecture_messages", {
+  id: serial("id").primaryKey(),
+  lectureId: integer("lectureId").notNull(),
+  userId: text("userId").notNull(),
+  role: text("role").$type<"user" | "assistant">().notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+})
+
 export type Lecture = typeof lectures.$inferSelect
+export type LectureMessage = typeof lectureMessages.$inferSelect
 export type StudySet = typeof studySets.$inferSelect
 export type QuizAttempt = typeof quizAttempts.$inferSelect
 export type User = typeof user.$inferSelect

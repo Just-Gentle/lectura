@@ -1,8 +1,17 @@
 "use client"
 
-import { BookOpen, Brain, Clock, Layers, NotebookPen, Target } from "lucide-react"
-import type { StudySet } from "@/lib/db/schema"
+import {
+  BookOpen,
+  Brain,
+  Clock,
+  Layers,
+  MessageSquare,
+  NotebookPen,
+  Target,
+} from "lucide-react"
+import type { LectureMessage, StudySet } from "@/lib/db/schema"
 import { FlashcardDeck } from "@/components/flashcard-deck"
+import { LectureChat } from "@/components/lecture-chat"
 import { QuizRunner } from "@/components/quiz-runner"
 import { StudyNotes } from "@/components/study-notes"
 import { Badge } from "@/components/ui/badge"
@@ -12,9 +21,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 export function StudySetView({
   lectureId,
   studySet,
+  chatMessages,
 }: {
   lectureId: number
   studySet: StudySet
+  chatMessages: LectureMessage[]
 }) {
   const questions = studySet.questions ?? []
   const flashcards = studySet.flashcards ?? []
@@ -76,6 +87,10 @@ export function StudySetView({
           <TabsTrigger value="notes">
             <NotebookPen className="h-4 w-4" aria-hidden="true" />
             Notes
+          </TabsTrigger>
+          <TabsTrigger value="ask">
+            <MessageSquare className="h-4 w-4" aria-hidden="true" />
+            Ask
           </TabsTrigger>
         </TabsList>
 
@@ -201,6 +216,10 @@ export function StudySetView({
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="ask" className="mt-6">
+          <LectureChat lectureId={lectureId} initialMessages={chatMessages} />
         </TabsContent>
       </Tabs>
     </div>
