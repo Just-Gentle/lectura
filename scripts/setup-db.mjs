@@ -52,7 +52,7 @@ const statements = [
     "title" text NOT NULL,
     "courseName" text,
     "fileName" text NOT NULL,
-    "fileUrl" text NOT NULL,
+    "filePath" text NOT NULL,
     "fileSize" integer NOT NULL DEFAULT 0,
     "pageCount" integer NOT NULL DEFAULT 0,
     "wordCount" integer NOT NULL DEFAULT 0,
@@ -63,6 +63,17 @@ const statements = [
     "updatedAt" timestamp NOT NULL DEFAULT now()
   )`,
   `CREATE INDEX IF NOT EXISTS "lectures_userId_idx" ON "lectures" ("userId")`,
+  // Earlier versions stored a public blob URL. The store is private, so the column
+  // now holds the blob pathname that the authenticated file route streams from.
+  `DO $$
+  BEGIN
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'lectures' AND column_name = 'fileUrl'
+    ) THEN
+      ALTER TABLE "lectures" RENAME COLUMN "fileUrl" TO "filePath";
+    END IF;
+  END $$`,
   `CREATE TABLE IF NOT EXISTS "study_sets" (
     "id" serial PRIMARY KEY,
     "lectureId" integer NOT NULL,
