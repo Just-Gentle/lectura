@@ -105,7 +105,23 @@ export default async function LecturePage({
             </dl>
           </div>
 
-          {studySet && <RegenerateButton lectureId={lectureId} />}
+          <div className="flex items-center gap-2">
+            <Button
+              render={
+                <a
+                  href={`/api/lectures/${lectureId}/file`}
+                  target="_blank"
+                  rel="noreferrer"
+                />
+              }
+              variant="outline"
+              size="sm"
+            >
+              <FileText className="h-4 w-4" aria-hidden="true" />
+              Open PDF
+            </Button>
+            {studySet && <RegenerateButton lectureId={lectureId} />}
+          </div>
         </div>
 
         {studySet ? (

@@ -111,9 +111,12 @@ export async function uploadLecture(formData: FormData): Promise<ActionResult> {
     }
   }
 
-  const blob = await put(`lectures/${userId}/${Date.now()}-${file.name}`, file, {
-    access: "public",
+  // The Blob store is private: the returned URL is not publicly fetchable, so we
+  // persist the pathname and stream the PDF back through an authenticated route.
+  const blob = await put(`lectures/${userId}/${file.name}`, file, {
+    access: "private",
     addRandomSuffix: true,
+    contentType: "application/pdf",
   })
 
   const [lecture] = await db
@@ -123,7 +126,7 @@ export async function uploadLecture(formData: FormData): Promise<ActionResult> {
       title,
       courseName: rawCourse || null,
       fileName: file.name,
-      fileUrl: blob.url,
+      filePath: blob.pathname,
       fileSize: file.size,
       pageCount: extracted.pageCount,
       wordCount: extracted.wordCount,
@@ -235,7 +238,7 @@ export async function deleteLecture(lectureId: number) {
   const userId = await getUserId()
 
   const [lecture] = await db
-    .select({ fileUrl: lectures.fileUrl })
+    .select({ filePath: lectures.filePath })
     .from(lectures)
     .where(and(eq(lectures.id, lectureId), eq(lectures.userId, userId)))
     .limit(1)
@@ -257,7 +260,7 @@ export async function deleteLecture(lectureId: number) {
     .where(and(eq(lectures.id, lectureId), eq(lectures.userId, userId)))
 
   try {
-    await del(lecture.fileUrl)
+    await del(lecture.filePath)
   } catch (error) {
     console.log("[v0] blob delete failed:", error)
   }
