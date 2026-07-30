@@ -15,6 +15,31 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getCurrentUser } from "@/lib/session"
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const lectureId = Number(id)
+  if (!Number.isInteger(lectureId)) return { title: "Lecture" }
+
+  try {
+    const lecture = await getLecture(lectureId)
+    if (!lecture) return { title: "Lecture not found" }
+
+    return {
+      title: lecture.title,
+      description: lecture.courseName
+        ? `Study set for ${lecture.title} (${lecture.courseName}).`
+        : `Study set for ${lecture.title}.`,
+    }
+  } catch {
+    // Signed out: the page itself redirects to /sign-in.
+    return { title: "Lecture" }
+  }
+}
+
 export default async function LecturePage({
   params,
 }: {
