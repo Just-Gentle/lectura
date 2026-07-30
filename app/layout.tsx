@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
@@ -65,9 +66,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} bg-background`}>
+    <html
+      lang="en"
+      className={`${inter.variable} bg-background`}
+      suppressHydrationWarning
+    >
       <body className="min-h-svh antialiased">
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
         <Toaster />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
