@@ -62,19 +62,17 @@ export function UploadLectureDialog({ variant = "default" }: { variant?: "defaul
         if (!pending) setOpen(next)
       }}
     >
-      <DialogTrigger asChild>
-        {variant === "empty" ? (
-          <Button size="lg">
-            <Upload className="h-4 w-4" aria-hidden="true" />
-            Upload your first lecture
-          </Button>
-        ) : (
-          <Button>
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            New lecture
-          </Button>
-        )}
-      </DialogTrigger>
+      {variant === "empty" ? (
+        <DialogTrigger render={<Button size="lg" />}>
+          <Upload className="h-4 w-4" aria-hidden="true" />
+          Upload your first lecture
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger render={<Button />}>
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          New lecture
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

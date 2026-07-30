@@ -13,16 +13,16 @@ export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
 
         <div className="flex items-center gap-2">
           {signedIn ? (
-            <Button asChild size="sm">
-              <Link href="/dashboard">Go to dashboard</Link>
+            <Button render={<Link href="/dashboard" />} size="sm">
+              Go to dashboard
             </Button>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/sign-in">Sign in</Link>
+              <Button render={<Link href="/sign-in" />} variant="ghost" size="sm">
+                Sign in
               </Button>
-              <Button asChild size="sm">
-                <Link href="/sign-up">Get started</Link>
+              <Button render={<Link href="/sign-up" />} size="sm">
+                Get started
               </Button>
             </>
           )}

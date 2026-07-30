@@ -102,18 +102,20 @@ export default async function HomePage() {
                 smarter, not harder.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="text-base">
-                  <Link href={user ? "/dashboard" : "/sign-up"}>
-                    {user ? "Go to dashboard" : "Get started free"}
-                  </Link>
+                <Button
+                  render={<Link href={user ? "/dashboard" : "/sign-up"} />}
+                  size="lg"
+                  className="text-base"
+                >
+                  {user ? "Go to dashboard" : "Get started free"}
                 </Button>
                 <Button
-                  asChild
+                  render={<Link href="#features" />}
                   variant="outline"
                   size="lg"
                   className="text-base"
                 >
-                  <Link href="#features">Learn more</Link>
+                  Learn more
                 </Button>
               </div>
             </div>
@@ -202,10 +204,12 @@ export default async function HomePage() {
             Upload your first lecture and get a full study set in under a
             minute.
           </p>
-          <Button asChild size="lg" className="text-base">
-            <Link href={user ? "/dashboard" : "/sign-up"}>
-              {user ? "Go to dashboard" : "Start free today"}
-            </Link>
+          <Button
+            render={<Link href={user ? "/dashboard" : "/sign-up"} />}
+            size="lg"
+            className="text-base"
+          >
+            {user ? "Go to dashboard" : "Start free today"}
           </Button>
         </div>
       </section>

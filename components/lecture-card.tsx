@@ -42,7 +42,7 @@ export function LectureCard({ lecture }: { lecture: Lecture }) {
   }
 
   return (
-    <Card className="flex flex-col transition-colors hover:border-accent/50">
+    <Card className="flex h-full flex-col transition-colors hover:border-accent/50">
       <CardHeader className="flex flex-row items-start justify-between gap-2">
         <div className="flex flex-col gap-2">
           <Badge variant={status.variant} className="w-fit">
@@ -62,15 +62,13 @@ export function LectureCard({ lecture }: { lecture: Lecture }) {
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0"
-              aria-label={`Actions for ${lecture.title}`}
-            >
-              <MoreVertical className="h-4 w-4" aria-hidden="true" />
-            </Button>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" />
+            }
+            aria-label={`Actions for ${lecture.title}`}
+          >
+            <MoreVertical className="h-4 w-4" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
@@ -107,10 +105,13 @@ export function LectureCard({ lecture }: { lecture: Lecture }) {
           </div>
         </dl>
 
-        <Button asChild variant="secondary" size="sm" className="w-full">
-          <Link href={`/lectures/${lecture.id}`}>
-            {lecture.status === "ready" ? "Open study set" : "View lecture"}
-          </Link>
+        <Button
+          render={<Link href={`/lectures/${lecture.id}`} />}
+          variant="secondary"
+          size="sm"
+          className="w-full"
+        >
+          {lecture.status === "ready" ? "Open study set" : "View lecture"}
         </Button>
       </CardContent>
     </Card>
