@@ -112,6 +112,26 @@ const statements = [
   )`,
   // The chat panel loads one lecture's thread in chronological order.
   `CREATE INDEX IF NOT EXISTS "lecture_messages_thread_idx" ON "lecture_messages" ("lectureId", "userId", "createdAt")`,
+  `CREATE TABLE IF NOT EXISTS "card_reviews" (
+    "id" serial PRIMARY KEY,
+    "userId" text NOT NULL,
+    "lectureId" integer NOT NULL,
+    "cardIndex" integer NOT NULL,
+    "front" text,
+    "repetitions" integer NOT NULL DEFAULT 0,
+    "lapses" integer NOT NULL DEFAULT 0,
+    "totalReviews" integer NOT NULL DEFAULT 0,
+    "intervalDays" integer NOT NULL DEFAULT 0,
+    "easeHundredths" integer NOT NULL DEFAULT 250,
+    "lastRating" text,
+    "dueAt" timestamp NOT NULL DEFAULT now(),
+    "lastReviewedAt" timestamp NOT NULL DEFAULT now(),
+    "createdAt" timestamp NOT NULL DEFAULT now()
+  )`,
+  // One row per card, so grading can upsert on this key.
+  `CREATE UNIQUE INDEX IF NOT EXISTS "card_reviews_card_key" ON "card_reviews" ("userId", "lectureId", "cardIndex")`,
+  // The review queue scans a user's rows by due date.
+  `CREATE INDEX IF NOT EXISTS "card_reviews_due_idx" ON "card_reviews" ("userId", "dueAt")`,
 ]
 
 const port = Number(process.env.PGPORT ?? 5432)

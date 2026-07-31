@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import {
   BookOpen,
   Brain,
@@ -8,6 +9,7 @@ import {
   MessageSquare,
   NotebookPen,
   Target,
+  Zap,
 } from "lucide-react"
 import type { LectureMessage, StudySet } from "@/lib/db/schema"
 import { FlashcardDeck } from "@/components/flashcard-deck"
@@ -15,6 +17,7 @@ import { LectureChat } from "@/components/lecture-chat"
 import { QuizRunner } from "@/components/quiz-runner"
 import { StudyNotes } from "@/components/study-notes"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -193,7 +196,19 @@ export function StudySetView({
 
         <TabsContent value="flashcards" className="mt-6">
           {flashcards.length > 0 ? (
-            <FlashcardDeck cards={flashcards} />
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-secondary/40 px-4 py-3">
+                <p className="text-sm text-muted-foreground text-pretty">
+                  Free browsing below, or let spaced repetition decide what you see
+                  next.
+                </p>
+                <Button size="sm" variant="secondary" render={<Link href="/review" />}>
+                  <Zap className="h-4 w-4" aria-hidden="true" />
+                  Review scheduled cards
+                </Button>
+              </div>
+              <FlashcardDeck cards={flashcards} />
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">
               No flashcards were generated for this lecture.
