@@ -6,6 +6,7 @@ import { useState } from "react"
 import { BookOpen, LogOut } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -76,28 +77,34 @@ export function AppHeader({ name, email }: { name: string; email: string }) {
           </nav>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={<Button variant="ghost" className="h-9 gap-2 px-2" />}
-            aria-label="Account menu"
-          >
-            <Avatar className="h-7 w-7">
-              <AvatarFallback className="text-xs">{initials(name)}</AvatarFallback>
-            </Avatar>
-            <span className="hidden text-sm font-medium sm:inline">{name}</span>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel className="flex flex-col gap-1">
-              <span className="text-sm font-medium">{name}</span>
-              <span className="text-xs font-normal text-muted-foreground">{email}</span>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut} disabled={signingOut}>
-              <LogOut className="h-4 w-4" aria-hidden="true" />
-              {signingOut ? "Signing out…" : "Sign out"}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={<Button variant="ghost" className="h-9 gap-2 px-2" />}
+              aria-label="Account menu"
+            >
+              <Avatar className="h-7 w-7">
+                <AvatarFallback className="text-xs">{initials(name)}</AvatarFallback>
+              </Avatar>
+              <span className="hidden text-sm font-medium sm:inline">{name}</span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="flex flex-col gap-1">
+                <span className="text-sm font-medium">{name}</span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  {email}
+                </span>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} disabled={signingOut}>
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                {signingOut ? "Signing out…" : "Sign out"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   )

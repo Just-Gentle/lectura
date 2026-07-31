@@ -4,16 +4,43 @@ import { ArrowLeft, FileText, RotateCcw } from "lucide-react"
 import {
   getLecture,
   getStudySet,
+  listLectureMessages,
   listQuizAttempts,
 } from "@/app/actions/lectures"
 import { AppHeader } from "@/components/app-header"
 import { GenerateStudySetPanel } from "@/components/generate-study-set-panel"
+import { LectureChat } from "@/components/lecture-chat"
 import { RegenerateButton } from "@/components/regenerate-button"
 import { StudySetView } from "@/components/study-set-view"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getCurrentUser } from "@/lib/session"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const lectureId = Number(id)
+  if (!Number.isInteger(lectureId)) return { title: "Lecture" }
+
+  try {
+    const lecture = await getLecture(lectureId)
+    if (!lecture) return { title: "Lecture not found" }
+
+    return {
+      title: lecture.title,
+      description: lecture.courseName
+        ? `Study set for ${lecture.title} (${lecture.courseName}).`
+        : `Study set for ${lecture.title}.`,
+    }
+  } catch {
+    // Signed out: the page itself redirects to /sign-in.
+    return { title: "Lecture" }
+  }
+}
 
 export default async function LecturePage({
   params,
@@ -30,9 +57,10 @@ export default async function LecturePage({
   const lecture = await getLecture(lectureId)
   if (!lecture) notFound()
 
-  const [studySet, attempts] = await Promise.all([
+  const [studySet, attempts, chatMessages] = await Promise.all([
     getStudySet(lectureId),
     listQuizAttempts(lectureId),
+    listLectureMessages(lectureId),
   ])
 
   return (
@@ -77,12 +105,32 @@ export default async function LecturePage({
             </dl>
           </div>
 
-          {studySet && <RegenerateButton lectureId={lectureId} />}
+          <div className="flex items-center gap-2">
+            <Button
+              render={
+                <a
+                  href={`/api/lectures/${lectureId}/file`}
+                  target="_blank"
+                  rel="noreferrer"
+                />
+              }
+              variant="outline"
+              size="sm"
+            >
+              <FileText className="h-4 w-4" aria-hidden="true" />
+              Open PDF
+            </Button>
+            {studySet && <RegenerateButton lectureId={lectureId} />}
+          </div>
         </div>
 
         {studySet ? (
           <div className="flex flex-col gap-8">
-            <StudySetView lectureId={lectureId} studySet={studySet} />
+            <StudySetView
+              lectureId={lectureId}
+              studySet={studySet}
+              chatMessages={chatMessages}
+            />
 
             {attempts.length > 0 && (
               <Card>
@@ -124,12 +172,17 @@ export default async function LecturePage({
             )}
           </div>
         ) : (
-          <GenerateStudySetPanel
-            lectureId={lectureId}
-            status={lecture.status}
-            errorMessage={lecture.errorMessage}
-            hasStudySet={false}
-          />
+          <div className="flex flex-col gap-8">
+            <GenerateStudySetPanel
+              lectureId={lectureId}
+              status={lecture.status}
+              errorMessage={lecture.errorMessage}
+              hasStudySet={false}
+            />
+            {lecture.extractedText && (
+              <LectureChat lectureId={lectureId} initialMessages={chatMessages} />
+            )}
+          </div>
         )}
       </main>
     </div>

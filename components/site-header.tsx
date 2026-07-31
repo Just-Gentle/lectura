@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { BookOpen } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 
 export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
@@ -12,6 +13,7 @@ export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
         </Link>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {signedIn ? (
             <Button render={<Link href="/dashboard" />} size="sm">
               Go to dashboard

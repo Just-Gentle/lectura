@@ -1,11 +1,11 @@
 "use server"
 
 import { del, put } from "@vercel/blob"
-import { and, desc, eq } from "drizzle-orm"
+import { and, asc, desc, eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { generateStudySet, STUDY_MODEL } from "@/lib/ai/generate-study-set"
 import { db } from "@/lib/db"
-import { lectures, quizAttempts, studySets } from "@/lib/db/schema"
+import { lectureMessages, lectures, quizAttempts, studySets } from "@/lib/db/schema"
 import { extractPdfText } from "@/lib/pdf"
 import { getUserId } from "@/lib/session"
 
@@ -53,6 +53,27 @@ export async function listQuizAttempts(lectureId: number) {
     .orderBy(desc(quizAttempts.createdAt))
 }
 
+export async function listLectureMessages(lectureId: number) {
+  const userId = await getUserId()
+  return db
+    .select()
+    .from(lectureMessages)
+    .where(
+      and(eq(lectureMessages.lectureId, lectureId), eq(lectureMessages.userId, userId)),
+    )
+    .orderBy(asc(lectureMessages.createdAt))
+}
+
+export async function clearLectureMessages(lectureId: number) {
+  const userId = await getUserId()
+  await db
+    .delete(lectureMessages)
+    .where(
+      and(eq(lectureMessages.lectureId, lectureId), eq(lectureMessages.userId, userId)),
+    )
+  revalidatePath(`/lectures/${lectureId}`)
+}
+
 export async function uploadLecture(formData: FormData): Promise<ActionResult> {
   const userId = await getUserId()
 
@@ -90,9 +111,12 @@ export async function uploadLecture(formData: FormData): Promise<ActionResult> {
     }
   }
 
-  const blob = await put(`lectures/${userId}/${Date.now()}-${file.name}`, file, {
-    access: "public",
+  // The Blob store is private: the returned URL is not publicly fetchable, so we
+  // persist the pathname and stream the PDF back through an authenticated route.
+  const blob = await put(`lectures/${userId}/${file.name}`, file, {
+    access: "private",
     addRandomSuffix: true,
+    contentType: "application/pdf",
   })
 
   const [lecture] = await db
@@ -102,7 +126,7 @@ export async function uploadLecture(formData: FormData): Promise<ActionResult> {
       title,
       courseName: rawCourse || null,
       fileName: file.name,
-      fileUrl: blob.url,
+      filePath: blob.pathname,
       fileSize: file.size,
       pageCount: extracted.pageCount,
       wordCount: extracted.wordCount,
@@ -214,7 +238,7 @@ export async function deleteLecture(lectureId: number) {
   const userId = await getUserId()
 
   const [lecture] = await db
-    .select({ fileUrl: lectures.fileUrl })
+    .select({ filePath: lectures.filePath })
     .from(lectures)
     .where(and(eq(lectures.id, lectureId), eq(lectures.userId, userId)))
     .limit(1)
@@ -227,11 +251,16 @@ export async function deleteLecture(lectureId: number) {
     .delete(quizAttempts)
     .where(and(eq(quizAttempts.lectureId, lectureId), eq(quizAttempts.userId, userId)))
   await db
+    .delete(lectureMessages)
+    .where(
+      and(eq(lectureMessages.lectureId, lectureId), eq(lectureMessages.userId, userId)),
+    )
+  await db
     .delete(lectures)
     .where(and(eq(lectures.id, lectureId), eq(lectures.userId, userId)))
 
   try {
-    await del(lecture.fileUrl)
+    await del(lecture.filePath)
   } catch (error) {
     console.log("[v0] blob delete failed:", error)
   }
