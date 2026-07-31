@@ -19,7 +19,7 @@ export default function DashboardLoading() {
         <PageHeadingSkeleton lines={2} />
 
         <div className="mb-10">
-          <StatCardsSkeleton count={3} />
+          <StatCardsSkeleton count={4} />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

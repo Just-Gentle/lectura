@@ -5,7 +5,13 @@ import { and, asc, desc, eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { generateStudySet, STUDY_MODEL } from "@/lib/ai/generate-study-set"
 import { db } from "@/lib/db"
-import { lectureMessages, lectures, quizAttempts, studySets } from "@/lib/db/schema"
+import {
+  cardReviews,
+  lectureMessages,
+  lectures,
+  quizAttempts,
+  studySets,
+} from "@/lib/db/schema"
 import { extractPdfText } from "@/lib/pdf"
 import { getUserId } from "@/lib/session"
 
@@ -255,6 +261,9 @@ export async function deleteLecture(lectureId: number) {
     .where(
       and(eq(lectureMessages.lectureId, lectureId), eq(lectureMessages.userId, userId)),
     )
+  await db
+    .delete(cardReviews)
+    .where(and(eq(cardReviews.lectureId, lectureId), eq(cardReviews.userId, userId)))
   await db
     .delete(lectures)
     .where(and(eq(lectures.id, lectureId), eq(lectures.userId, userId)))

@@ -20,6 +20,7 @@ import {
 
 const navLinks = [
   { href: "/dashboard", label: "Lectures" },
+  { href: "/review", label: "Review" },
   { href: "/progress", label: "Progress" },
 ]
 

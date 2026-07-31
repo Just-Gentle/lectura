@@ -140,6 +140,34 @@ export const quizAttempts = pgTable("quiz_attempts", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 })
 
+/**
+ * One row per flashcard the user has actually reviewed. Cards without a row are
+ * treated as "new" by the scheduler, so no enrolment step is needed when a
+ * study set is generated.
+ */
+export const cardReviews = pgTable("card_reviews", {
+  id: serial("id").primaryKey(),
+  userId: text("userId").notNull(),
+  lectureId: integer("lectureId").notNull(),
+  /** Index into the study set's flashcards array. */
+  cardIndex: integer("cardIndex").notNull(),
+  /** Snapshot of the prompt, kept for debugging after a regeneration. */
+  front: text("front"),
+  repetitions: integer("repetitions").default(0).notNull(),
+  lapses: integer("lapses").default(0).notNull(),
+  totalReviews: integer("totalReviews").default(0).notNull(),
+  intervalDays: integer("intervalDays").default(0).notNull(),
+  /** SM-2 style ease factor, stored x100 to keep the column an integer. */
+  easeHundredths: integer("easeHundredths").default(250).notNull(),
+  lastRating: text("lastRating").$type<ReviewRating>(),
+  dueAt: timestamp("dueAt").defaultNow().notNull(),
+  lastReviewedAt: timestamp("lastReviewedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+})
+
+export type ReviewRating = "again" | "hard" | "good" | "easy"
+export type CardReview = typeof cardReviews.$inferSelect
+
 export const lectureMessages = pgTable("lecture_messages", {
   id: serial("id").primaryKey(),
   lectureId: integer("lectureId").notNull(),
