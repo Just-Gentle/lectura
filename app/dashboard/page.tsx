@@ -1,9 +1,12 @@
+import Link from "next/link"
 import { redirect } from "next/navigation"
-import { BookOpen, CheckCircle2, FileText, Layers } from "lucide-react"
+import { BookOpen, CheckCircle2, FileText, Layers, Zap } from "lucide-react"
 import { listLectures } from "@/app/actions/lectures"
+import { getDueSummary } from "@/app/actions/reviews"
 import { AppHeader } from "@/components/app-header"
 import { LectureBrowser } from "@/components/lecture-browser"
 import { UploadLectureDialog } from "@/components/upload-lecture-dialog"
+import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { getCurrentUser } from "@/lib/session"
 
@@ -16,14 +19,16 @@ export default async function DashboardPage() {
   const user = await getCurrentUser()
   if (!user) redirect("/sign-in")
 
-  const lectures = await listLectures()
+  const [lectures, review] = await Promise.all([listLectures(), getDueSummary()])
   const ready = lectures.filter((l) => l.status === "ready").length
   const totalPages = lectures.reduce((sum, l) => sum + l.pageCount, 0)
+  const readyToReview = review.due + review.new
 
   const stats = [
     { icon: FileText, label: "Lectures", value: lectures.length },
     { icon: CheckCircle2, label: "Study sets ready", value: ready },
     { icon: Layers, label: "Pages analysed", value: totalPages },
+    { icon: Zap, label: "Cards to review", value: readyToReview },
   ]
 
   return (
@@ -44,8 +49,29 @@ export default async function DashboardPage() {
           {lectures.length > 0 && <UploadLectureDialog />}
         </div>
 
+        {readyToReview > 0 && (
+          <Card className="mb-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="rounded-lg bg-accent/10 p-3">
+                <Zap className="h-5 w-5 text-accent" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="font-semibold">
+                  {review.due > 0
+                    ? `${review.due} ${review.due === 1 ? "card is" : "cards are"} due for review`
+                    : `${review.new} new ${review.new === 1 ? "card is" : "cards are"} ready to learn`}
+                </p>
+                <p className="text-sm text-muted-foreground text-pretty">
+                  Spaced repetition keeps these lectures in long-term memory.
+                </p>
+              </div>
+            </div>
+            <Button render={<Link href="/review" />}>Start review</Button>
+          </Card>
+        )}
+
         {lectures.length > 0 && (
-          <div className="mb-10 grid gap-4 sm:grid-cols-3">
+          <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map(({ icon: Icon, label, value }) => (
               <Card key={label} className="flex flex-row items-center gap-4 p-5">
                 <div className="rounded-lg bg-accent/10 p-3">
