@@ -71,7 +71,7 @@ export async function sendEmail({
     })
     return { sent: true }
   } catch (error) {
-    console.error("[v0] Failed to send email:", error)
+    console.error("[v0] Failed to send email:", JSON.stringify(error, null, 2))
     return { sent: false }
   }
 }
